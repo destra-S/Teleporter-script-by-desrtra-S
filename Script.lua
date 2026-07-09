@@ -40,6 +40,7 @@ local isNoclipping = false
 local noclipSpeed = 25
 local noclipConnections = {}
 local originalCollisionGroups = {}
+local noclipConnection = nil
 
 -- ============ GUI SETUP ============
 local screenGui = Instance.new("ScreenGui")
@@ -873,11 +874,55 @@ local function startNoclip()
 
     noclipToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 120, 30)
     noclipToggleBtn.Text = "👻 Stop"
+    
+    -- START NOCLIP MOVEMENT LOOP
+    if noclipConnection then noclipConnection:Disconnect() end
+    noclipConnection = RunService.RenderStepped:Connect(function()
+        if not isNoclipping then return end
+        local character = player.Character
+        if not character then return end
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        
+        local moveDir = Vector3.new(0, 0, 0)
+        local camera = workspace.CurrentCamera
+        
+        -- Get movement input
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            moveDir = moveDir + (camera.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            moveDir = moveDir - (camera.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            moveDir = moveDir - camera.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            moveDir = moveDir + camera.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            moveDir = moveDir + Vector3.new(0, 1, 0)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+            moveDir = moveDir - Vector3.new(0, 1, 0)
+        end
+        
+        if moveDir.Magnitude > 0 then
+            moveDir = moveDir.Unit
+        end
+        
+        hrp.CFrame = hrp.CFrame + (moveDir * noclipSpeed * 0.016)
+    end)
 end
 
 local function stopNoclip()
     if not isNoclipping then return end
     isNoclipping = false
+
+    if noclipConnection then
+        noclipConnection:Disconnect()
+        noclipConnection = nil
+    end
 
     local character = player.Character
     if character then
@@ -924,11 +969,56 @@ local function startFlying()
 
     flyToggleBtn.BackgroundColor3 = Color3.fromRGB(150, 30, 30)
     flyToggleBtn.Text = "✈️ Stop"
+    
+    -- START FLY MOVEMENT LOOP
+    if flyConnection then flyConnection:Disconnect() end
+    flyConnection = RunService.RenderStepped:Connect(function()
+        if not isFlying or not flyBodyVelocity then return end
+        
+        -- Update fly speed from text box
+        flySpeed = tonumber(flySpeedSlider.Text) or 50
+        flySpeedLabel.Text = "✈️ Speed: " .. flySpeed
+        
+        local moveDir = Vector3.new(0, 0, 0)
+        local camera = workspace.CurrentCamera
+        
+        -- Get movement input
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            moveDir = moveDir + (camera.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            moveDir = moveDir - (camera.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            moveDir = moveDir - camera.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            moveDir = moveDir + camera.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            moveDir = moveDir + Vector3.new(0, 1, 0)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+            moveDir = moveDir - Vector3.new(0, 1, 0)
+        end
+        
+        if moveDir.Magnitude > 0 then
+            moveDir = moveDir.Unit * flySpeed
+        end
+        
+        flyBodyVelocity.Velocity = moveDir
+        flyBody.CFrame = hrp.CFrame
+    end)
 end
 
 local function stopFlying()
     if not isFlying then return end
     isFlying = false
+
+    if flyConnection then
+        flyConnection:Disconnect()
+        flyConnection = nil
+    end
 
     if flyBody then
         flyBody:Destroy()
@@ -939,6 +1029,33 @@ local function stopFlying()
     flyToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 120, 30)
     flyToggleBtn.Text = "✈️ Fly"
 end
+
+-- ============ WINDOW DRAGGING ============
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+titleBar.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+    end
+end)
+
+titleBar.InputEnded:Connect(function(input, gameProcessed)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input, gameProcessed)
+    if dragging and dragStart and startPos then
+        local delta = input.Position - dragStart
+        mainFrame.Position = startPos + UDim2.new(0, delta.X, 0, delta.Y)
+    end
+end)
 
 -- ============ BUTTON EVENTS ============
 
@@ -1001,29 +1118,28 @@ saveButton.MouseButton1Click:Connect(function()
     end
 
     table.insert(savedPositions, {name = posName, cframe = hrp.CFrame})
-    nameBox.Text = ""
-    
     addEntryToList(#savedPositions, posName)
+    nameBox.Text = ""
 end)
 
--- Teleport to selected position
+-- Teleport button
 teleportButton.MouseButton1Click:Connect(function()
     if not selectedIndex or not savedPositions[selectedIndex] then return end
     
-    local targetPos = savedPositions[selectedIndex].cframe
+    local targetCFrame = savedPositions[selectedIndex].cframe
     
     if teleportMethod == "instant" then
-        instantTeleport(targetPos)
+        instantTeleport(targetCFrame)
     elseif teleportMethod == "tween" then
-        smoothTeleport(targetPos)
+        smoothTeleport(targetCFrame)
     elseif teleportMethod == "realistic" then
-        realisticTeleport(targetPos)
+        realisticTeleport(targetCFrame)
     end
 end)
 
--- Delete selected position
+-- Delete button
 deleteButton.MouseButton1Click:Connect(function()
-    if not selectedIndex or not savedPositions[selectedIndex] then return end
+    if not selectedIndex then return end
     
     table.remove(savedPositions, selectedIndex)
     entryButtons[selectedIndex]:Destroy()
@@ -1032,7 +1148,7 @@ deleteButton.MouseButton1Click:Connect(function()
     refreshHighlights()
 end)
 
--- Clear all positions
+-- Clear All button
 clearButton.MouseButton1Click:Connect(function()
     for i, btn in pairs(entryButtons) do
         btn:Destroy()
@@ -1042,7 +1158,18 @@ clearButton.MouseButton1Click:Connect(function()
     selectedIndex = nil
 end)
 
--- Fly toggle
+-- Minimize button
+minimizeButton.MouseButton1Click:Connect(function()
+    if contentFrame.Visible then
+        contentFrame.Visible = false
+        minimizeButton.Text = "+"
+    else
+        contentFrame.Visible = true
+        minimizeButton.Text = "–"
+    end
+end)
+
+-- Fly Toggle
 flyToggleBtn.MouseButton1Click:Connect(function()
     if isFlying then
         stopFlying()
@@ -1051,7 +1178,7 @@ flyToggleBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Noclip toggle
+-- Noclip Toggle
 noclipToggleBtn.MouseButton1Click:Connect(function()
     if isNoclipping then
         stopNoclip()
@@ -1060,114 +1187,36 @@ noclipToggleBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Fly speed update
-flySpeedSlider.FocusLost:Connect(function()
-    local speed = tonumber(flySpeedSlider.Text)
-    if speed and speed >= 1 and speed <= 200 then
-        flySpeed = speed
-        flySpeedLabel.Text = "✈️ Speed: " .. speed
-    else
-        flySpeedSlider.Text = tostring(flySpeed)
-    end
-end)
-
--- Noclip speed update
+-- Noclip Speed Update
 noclipSpeedSlider.FocusLost:Connect(function()
-    local speed = tonumber(noclipSpeedSlider.Text)
-    if speed and speed >= 1 and speed <= 100 then
-        noclipSpeed = speed
-        noclipSpeedLabel.Text = "👻 Speed: " .. speed
-    else
+    local newSpeed = tonumber(noclipSpeedSlider.Text)
+    if newSpeed then
+        noclipSpeed = math.clamp(newSpeed, 1, 100)
         noclipSpeedSlider.Text = tostring(noclipSpeed)
+        noclipSpeedLabel.Text = "👻 Speed: " .. noclipSpeed
     end
 end)
 
--- Apply walk speed
+-- Fly Speed Update (also happens in render loop but this is for text box changes)
+flySpeedSlider.FocusLost:Connect(function()
+    local newSpeed = tonumber(flySpeedSlider.Text)
+    if newSpeed then
+        flySpeed = math.clamp(newSpeed, 1, 200)
+        flySpeedSlider.Text = tostring(flySpeed)
+        flySpeedLabel.Text = "✈️ Speed: " .. flySpeed
+    end
+end)
+
+-- WalkSpeed Apply
 applyWalkSpeedBtn.MouseButton1Click:Connect(function()
     local character = player.Character
     if not character then return end
     local humanoid = character:FindFirstChild("Humanoid")
     if not humanoid then return end
     
-    local speed = tonumber(walkSpeedInput.Text)
-    if speed and speed >= 1 and speed <= 200 then
-        humanoid.WalkSpeed = speed
-        walkSpeedLabel.Text = "🚶 Walk: " .. speed
-    else
-        walkSpeedInput.Text = tostring(humanoid.WalkSpeed)
+    local newSpeed = tonumber(walkSpeedInput.Text)
+    if newSpeed then
+        humanoid.WalkSpeed = math.clamp(newSpeed, 1, 200)
+        walkSpeedLabel.Text = "🚶 Walk: " .. math.floor(humanoid.WalkSpeed)
     end
 end)
-
--- Minimize button
-minimizeButton.MouseButton1Click:Connect(function()
-    if mainFrame.Size.Y.Offset == 420 then
-        mainFrame:TweenSize(UDim2.new(0, 380, 0, 30), "InOut", "Quad", 0.3)
-        contentFrame.Visible = false
-    else
-        mainFrame:TweenSize(UDim2.new(0, 380, 0, 420), "InOut", "Quad", 0.3)
-        contentFrame.Visible = true
-    end
-end)
-
--- Dragging
-local dragging = false
-local dragOffset = Vector2.new(0, 0)
-
-titleBar.MouseButton1Down:Connect(function()
-    dragging = true
-    dragOffset = mainFrame.AbsolutePosition - game:GetService("UserInputService"):GetMouseLocation()
-end)
-
-UserInputService.InputEnded:Connect(function(input, gameProcessed)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
-RunService.RenderStepped:Connect(function()
-    if dragging then
-        local mousePos = game:GetService("UserInputService"):GetMouseLocation()
-        mainFrame.Position = UDim2.new(0, mousePos.X + dragOffset.X, 0, mousePos.Y + dragOffset.Y)
-    end
-    
-    -- Fly movement
-    if isFlying and flyBody and flyBodyVelocity then
-        local moveDir = Vector3.new(0, 0, 0)
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + (game.Workspace.CurrentCamera.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - (game.Workspace.CurrentCamera.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - game.Workspace.CurrentCamera.CFrame.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + game.Workspace.CurrentCamera.CFrame.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
-        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir = moveDir - Vector3.new(0, 1, 0) end
-        
-        if moveDir.Magnitude > 0 then
-            moveDir = moveDir.Unit
-        end
-        
-        flyBodyVelocity.Velocity = moveDir * flySpeed
-        flyBody.CFrame = player.Character.HumanoidRootPart.CFrame
-    end
-    
-    -- Noclip movement
-    if isNoclipping then
-        local character = player.Character
-        if character then
-            local moveDir = Vector3.new(0, 0, 0)
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + (game.Workspace.CurrentCamera.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - (game.Workspace.CurrentCamera.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - game.Workspace.CurrentCamera.CFrame.RightVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + game.Workspace.CurrentCamera.CFrame.RightVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir = moveDir - Vector3.new(0, 1, 0) end
-            
-            if moveDir.Magnitude > 0 then
-                moveDir = moveDir.Unit
-            end
-            
-            local hrp = character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                hrp.CFrame = hrp.CFrame + (moveDir * noclipSpeed * 0.016)
-            end
-        end
-    end
-end
