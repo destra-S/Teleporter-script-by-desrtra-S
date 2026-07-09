@@ -21,6 +21,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+local mouse = player:GetMouse()
 
 -- ============ STATE ============
 local savedPositions = {}
@@ -44,6 +45,11 @@ local noclipConnection = nil
 -- Invisible state
 local isInvisible = false
 local originalCharacterParts = {}
+
+-- Helper function for clamp
+local function clamp(value, min, max)
+    return math.max(min, math.min(max, value))
+end
 
 -- ============ GUI SETUP ============
 local screenGui = Instance.new("ScreenGui")
@@ -1002,41 +1008,30 @@ end
 local function startFlying()
     if isFlying then return end
     isFlying = true
-
-    local char = player.Character
-    if not char then isFlying = false return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
+    
+    local character = player.Character
+    if not character then isFlying = false return end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
     if not hrp then isFlying = false return end
-
-    flyBody = Instance.new("Part")
-    flyBody.Shape = Enum.PartType.Block
-    flyBody.Transparency = 1
-    flyBody.Size = Vector3.new(1, 1, 1)
-    flyBody.CanCollide = false
-    flyBody.CFrame = hrp.CFrame
-    flyBody.TopSurface = Enum.SurfaceType.Smooth
-    flyBody.BottomSurface = Enum.SurfaceType.Smooth
-    flyBody.Parent = workspace
-
-    flyBodyVelocity = Instance.new("BodyVelocity")
-    flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
-    flyBodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    flyBodyVelocity.Parent = flyBody
-
-    flyToggleBtn.BackgroundColor3 = Color3.fromRGB(150, 30, 30)
+    
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then humanoid.PlatformStand = true end
+    
+    flyBody = Instance.new("BodyVelocity")
+    flyBody.Velocity = Vector3.new(0, 0, 0)
+    flyBody.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    flyBody.Parent = hrp
+    
+    flyToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 30)
     flyToggleBtn.Text = "✈️ Stop"
     
     if flyConnection then flyConnection:Disconnect() end
     flyConnection = RunService.RenderStepped:Connect(function()
-        if not isFlying or not flyBody or not flyBodyVelocity then return end
-        
+        if not isFlying then return end
         local char = player.Character
-        if not char or not char.Parent then return end
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
-        
-        flySpeed = tonumber(flySpeedSlider.Text) or 50
-        flySpeedLabel.Text = "✈️ Speed: " .. flySpeed
+        if not char then return end
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if not root or not flyBody then return end
         
         local cam = workspace.CurrentCamera
         local forward = (cam.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit
@@ -1056,26 +1051,30 @@ local function startFlying()
             moveDir = moveDir.Unit * flySpeed
         end
         
-        flyBodyVelocity.Velocity = moveDir
-        flyBody.CFrame = hrp.CFrame
+        flyBody.Velocity = moveDir
     end)
 end
 
 local function stopFlying()
     if not isFlying then return end
     isFlying = false
-
+    
     if flyConnection then
         flyConnection:Disconnect()
         flyConnection = nil
     end
-
+    
     if flyBody then
         flyBody:Destroy()
         flyBody = nil
     end
-    flyBodyVelocity = nil
-
+    
+    local char = player.Character
+    if char then
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then humanoid.PlatformStand = false end
+    end
+    
     flyToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 120, 30)
     flyToggleBtn.Text = "✈️ Fly"
 end
@@ -1089,7 +1088,7 @@ titleBar.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
-        dragStart = input.Position
+        dragStart = mouse.X - mainFrame.AbsolutePosition.X
         startPos = mainFrame.Position
     end
 end)
@@ -1102,8 +1101,8 @@ end)
 
 UserInputService.InputChanged:Connect(function(input, gameProcessed)
     if dragging and dragStart and startPos then
-        local delta = input.Position - dragStart
-        mainFrame.Position = startPos + UDim2.new(0, delta.X, 0, delta.Y)
+        local newX = mouse.X - dragStart
+        mainFrame.Position = UDim2.new(0, newX, startPos.Y.Scale, startPos.Y.Offset)
     end
 end)
 
@@ -1123,10 +1122,10 @@ miscTabBtn.MouseButton1Click:Connect(function()
     currentTab = "misc"
     teleporterTab.Visible = false
     miscTab.Visible = true
-    teleporterTabBtn.BackgroundColor3 = Color3.fromRGB(40, 25, 70)
-    teleporterTabStroke.Transparency = 0.5
     miscTabBtn.BackgroundColor3 = Color3.fromRGB(70, 30, 120)
     miscTabStroke.Transparency = 0.3
+    teleporterTabBtn.BackgroundColor3 = Color3.fromRGB(40, 25, 70)
+    teleporterTabStroke.Transparency = 0.5
 end)
 
 instantMethodBtn.MouseButton1Click:Connect(function()
@@ -1138,7 +1137,7 @@ instantMethodBtn.MouseButton1Click:Connect(function()
 end)
 
 tweenMethodBtn.MouseButton1Click:Connect(function()
-    teleportMethod = "tween"
+    teleportMethod = "smooth"
     methodLabel.Text = "Method: smooth"
     instantMethodBtn.BackgroundColor3 = Color3.fromRGB(50, 40, 100)
     tweenMethodBtn.BackgroundColor3 = Color3.fromRGB(100, 60, 180)
@@ -1161,11 +1160,13 @@ saveButton.MouseButton1Click:Connect(function()
 
     local posName = nameBox.Text
     if posName == "" then
-        posName = "Position " .. (#savedPositions + 1)
+        posName = "Position #" .. (#savedPositions + 1)
     end
 
     table.insert(savedPositions, {name = posName, cframe = hrp.CFrame})
     addEntryToList(#savedPositions, posName)
+    selectedIndex = #savedPositions
+    refreshHighlights()
     nameBox.Text = ""
 end)
 
@@ -1176,7 +1177,7 @@ teleportButton.MouseButton1Click:Connect(function()
     
     if teleportMethod == "instant" then
         instantTeleport(targetCFrame)
-    elseif teleportMethod == "tween" then
+    elseif teleportMethod == "smooth" then
         smoothTeleport(targetCFrame)
     elseif teleportMethod == "realistic" then
         realisticTeleport(targetCFrame)
@@ -1196,17 +1197,19 @@ clearButton.MouseButton1Click:Connect(function()
     for i, btn in pairs(entryButtons) do
         btn:Destroy()
     end
-    entryButtons = {}
     savedPositions = {}
+    entryButtons = {}
     selectedIndex = nil
 end)
 
 minimizeButton.MouseButton1Click:Connect(function()
     if contentFrame.Visible then
         contentFrame.Visible = false
+        mainFrame.Size = UDim2.new(0, 380, 0, 30)
         minimizeButton.Text = "+"
     else
         contentFrame.Visible = true
+        mainFrame.Size = UDim2.new(0, 380, 0, 550)
         minimizeButton.Text = "–"
     end
 end)
@@ -1215,41 +1218,41 @@ flyToggleBtn.MouseButton1Click:Connect(function()
     if isFlying then stopFlying() else startFlying() end
 end)
 
+flySpeedSlider.FocusLost:Connect(function()
+    local speed = tonumber(flySpeedSlider.Text)
+    if speed then
+        flySpeed = clamp(speed, 1, 200)
+        flySpeedLabel.Text = "✈️ Speed: " .. flySpeed
+        flySpeedSlider.Text = tostring(flySpeed)
+    end
+end)
+
 noclipToggleBtn.MouseButton1Click:Connect(function()
     if isNoclipping then stopNoclip() else startNoclip() end
+end)
+
+noclipSpeedSlider.FocusLost:Connect(function()
+    local speed = tonumber(noclipSpeedSlider.Text)
+    if speed then
+        noclipSpeed = clamp(speed, 1, 100)
+        noclipSpeedLabel.Text = "👻 Speed: " .. noclipSpeed
+        noclipSpeedSlider.Text = tostring(noclipSpeed)
+    end
 end)
 
 invisibleToggleBtn.MouseButton1Click:Connect(function()
     if isInvisible then stopInvisible() else startInvisible() end
 end)
 
-noclipSpeedSlider.FocusLost:Connect(function()
-    local newSpeed = tonumber(noclipSpeedSlider.Text)
-    if newSpeed then
-        noclipSpeed = math.clamp(newSpeed, 1, 100)
-        noclipSpeedSlider.Text = tostring(noclipSpeed)
-        noclipSpeedLabel.Text = "👻 Speed: " .. noclipSpeed
-    end
-end)
-
-flySpeedSlider.FocusLost:Connect(function()
-    local newSpeed = tonumber(flySpeedSlider.Text)
-    if newSpeed then
-        flySpeed = math.clamp(newSpeed, 1, 200)
-        flySpeedSlider.Text = tostring(flySpeed)
-        flySpeedLabel.Text = "✈️ Speed: " .. flySpeed
-    end
-end)
-
 applyWalkSpeedBtn.MouseButton1Click:Connect(function()
     local char = player.Character
     if not char then return end
-    local humanoid = char:FindFirstChild("Humanoid")
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
     if not humanoid then return end
     
-    local newSpeed = tonumber(walkSpeedInput.Text)
-    if newSpeed then
-        humanoid.WalkSpeed = math.clamp(newSpeed, 1, 200)
+    local speed = tonumber(walkSpeedInput.Text)
+    if speed then
+        humanoid.WalkSpeed = clamp(speed, 1, 200)
         walkSpeedLabel.Text = "🚶 Walk: " .. math.floor(humanoid.WalkSpeed)
     end
 end)
