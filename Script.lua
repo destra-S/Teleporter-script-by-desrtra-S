@@ -23,10 +23,10 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- ============ STATE ============
-local savedPositions = {} -- { {name = "Home", cframe = CFrame}, ... }
+local savedPositions = {}
 local selectedIndex = nil
-local currentTab = "teleporter" -- "teleporter" or "misc"
-local teleportMethod = "instant" -- "instant", "tween", or "realistic"
+local currentTab = "teleporter"
+local teleportMethod = "instant"
 
 -- Fly state
 local isFlying = false
@@ -53,8 +53,8 @@ screenGui.Parent = playerGui
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 380, 0, 520)
-mainFrame.Position = UDim2.new(0.5, -190, 0.5, -260)
+mainFrame.Size = UDim2.new(0, 380, 0, 550)
+mainFrame.Position = UDim2.new(0.5, -190, 0.5, -275)
 mainFrame.BackgroundColor3 = Color3.fromRGB(10, 8, 30)
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
@@ -579,26 +579,26 @@ miscScroll.ZIndex = 3
 miscScroll.Parent = miscTab
 
 local miscLayout = Instance.new("UIListLayout")
-miscLayout.Padding = UDim.new(0, 4)
+miscLayout.Padding = UDim.new(0, 6)
 miscLayout.SortOrder = Enum.SortOrder.LayoutOrder
 miscLayout.Parent = miscScroll
 
 local miscScrollPadding = Instance.new("UIPadding")
-miscScrollPadding.PaddingTop = UDim.new(0, 6)
-miscScrollPadding.PaddingBottom = UDim.new(0, 6)
-miscScrollPadding.PaddingLeft = UDim.new(0, 6)
-miscScrollPadding.PaddingRight = UDim.new(0, 6)
+miscScrollPadding.PaddingTop = UDim.new(0, 8)
+miscScrollPadding.PaddingBottom = UDim.new(0, 8)
+miscScrollPadding.PaddingLeft = UDim.new(0, 8)
+miscScrollPadding.PaddingRight = UDim.new(0, 8)
 miscScrollPadding.Parent = miscScroll
 
 -- Fly Toggle Button
 local flyToggleBtn = Instance.new("TextButton")
 flyToggleBtn.Name = "FlyToggle"
-flyToggleBtn.Size = UDim2.new(1, 0, 0, 28)
+flyToggleBtn.Size = UDim2.new(1, 0, 0, 32)
 flyToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 120, 30)
 flyToggleBtn.Text = "✈️ Fly"
 flyToggleBtn.TextColor3 = Color3.fromRGB(240, 255, 240)
 flyToggleBtn.Font = Enum.Font.GothamBold
-flyToggleBtn.TextSize = 11
+flyToggleBtn.TextSize = 12
 flyToggleBtn.AutoButtonColor = false
 flyToggleBtn.ZIndex = 3
 flyToggleBtn.LayoutOrder = 1
@@ -615,12 +615,12 @@ flyToggleStroke.Parent = flyToggleBtn
 
 -- Fly Speed Label
 local flySpeedLabel = Instance.new("TextLabel")
-flySpeedLabel.Size = UDim2.new(1, 0, 0, 14)
+flySpeedLabel.Size = UDim2.new(1, 0, 0, 16)
 flySpeedLabel.BackgroundTransparency = 1
 flySpeedLabel.Text = "✈️ Speed: 50"
 flySpeedLabel.TextColor3 = Color3.fromRGB(200, 220, 255)
 flySpeedLabel.Font = Enum.Font.GothamBold
-flySpeedLabel.TextSize = 9
+flySpeedLabel.TextSize = 10
 flySpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
 flySpeedLabel.ZIndex = 3
 flySpeedLabel.LayoutOrder = 2
@@ -629,14 +629,14 @@ flySpeedLabel.Parent = miscScroll
 -- Fly Speed Slider
 local flySpeedSlider = Instance.new("TextBox")
 flySpeedSlider.Name = "FlySpeedSlider"
-flySpeedSlider.Size = UDim2.new(1, 0, 0, 20)
+flySpeedSlider.Size = UDim2.new(1, 0, 0, 24)
 flySpeedSlider.BackgroundColor3 = Color3.fromRGB(30, 30, 60)
 flySpeedSlider.PlaceholderText = "1-200"
 flySpeedSlider.Text = "50"
 flySpeedSlider.TextColor3 = Color3.fromRGB(230, 220, 255)
 flySpeedSlider.PlaceholderColor3 = Color3.fromRGB(140, 120, 180)
 flySpeedSlider.Font = Enum.Font.Gotham
-flySpeedSlider.TextSize = 9
+flySpeedSlider.TextSize = 11
 flySpeedSlider.ZIndex = 3
 flySpeedSlider.LayoutOrder = 3
 flySpeedSlider.Parent = miscScroll
@@ -653,12 +653,12 @@ flySpeedSliderStroke.Parent = flySpeedSlider
 -- Noclip Toggle Button
 local noclipToggleBtn = Instance.new("TextButton")
 noclipToggleBtn.Name = "NoclipToggle"
-noclipToggleBtn.Size = UDim2.new(1, 0, 0, 28)
+noclipToggleBtn.Size = UDim2.new(1, 0, 0, 32)
 noclipToggleBtn.BackgroundColor3 = Color3.fromRGB(120, 80, 30)
 noclipToggleBtn.Text = "👻 Noclip"
 noclipToggleBtn.TextColor3 = Color3.fromRGB(255, 240, 200)
 noclipToggleBtn.Font = Enum.Font.GothamBold
-noclipToggleBtn.TextSize = 11
+noclipToggleBtn.TextSize = 12
 noclipToggleBtn.AutoButtonColor = false
 noclipToggleBtn.ZIndex = 3
 noclipToggleBtn.LayoutOrder = 4
@@ -675,12 +675,12 @@ noclipToggleStroke.Parent = noclipToggleBtn
 
 -- Noclip Speed Label
 local noclipSpeedLabel = Instance.new("TextLabel")
-noclipSpeedLabel.Size = UDim2.new(1, 0, 0, 14)
+noclipSpeedLabel.Size = UDim2.new(1, 0, 0, 16)
 noclipSpeedLabel.BackgroundTransparency = 1
 noclipSpeedLabel.Text = "👻 Speed: 25"
 noclipSpeedLabel.TextColor3 = Color3.fromRGB(200, 220, 255)
 noclipSpeedLabel.Font = Enum.Font.GothamBold
-noclipSpeedLabel.TextSize = 9
+noclipSpeedLabel.TextSize = 10
 noclipSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
 noclipSpeedLabel.ZIndex = 3
 noclipSpeedLabel.LayoutOrder = 5
@@ -689,14 +689,14 @@ noclipSpeedLabel.Parent = miscScroll
 -- Noclip Speed Slider
 local noclipSpeedSlider = Instance.new("TextBox")
 noclipSpeedSlider.Name = "NoclipSpeedSlider"
-noclipSpeedSlider.Size = UDim2.new(1, 0, 0, 20)
+noclipSpeedSlider.Size = UDim2.new(1, 0, 0, 24)
 noclipSpeedSlider.BackgroundColor3 = Color3.fromRGB(30, 30, 60)
 noclipSpeedSlider.PlaceholderText = "1-100"
 noclipSpeedSlider.Text = "25"
 noclipSpeedSlider.TextColor3 = Color3.fromRGB(230, 220, 255)
 noclipSpeedSlider.PlaceholderColor3 = Color3.fromRGB(140, 120, 180)
 noclipSpeedSlider.Font = Enum.Font.Gotham
-noclipSpeedSlider.TextSize = 9
+noclipSpeedSlider.TextSize = 11
 noclipSpeedSlider.ZIndex = 3
 noclipSpeedSlider.LayoutOrder = 6
 noclipSpeedSlider.Parent = miscScroll
@@ -713,12 +713,12 @@ noclipSpeedSliderStroke.Parent = noclipSpeedSlider
 -- Invisible Toggle Button
 local invisibleToggleBtn = Instance.new("TextButton")
 invisibleToggleBtn.Name = "InvisibleToggle"
-invisibleToggleBtn.Size = UDim2.new(1, 0, 0, 28)
+invisibleToggleBtn.Size = UDim2.new(1, 0, 0, 32)
 invisibleToggleBtn.BackgroundColor3 = Color3.fromRGB(100, 50, 150)
 invisibleToggleBtn.Text = "👁️ Invisible"
 invisibleToggleBtn.TextColor3 = Color3.fromRGB(230, 200, 255)
 invisibleToggleBtn.Font = Enum.Font.GothamBold
-invisibleToggleBtn.TextSize = 11
+invisibleToggleBtn.TextSize = 12
 invisibleToggleBtn.AutoButtonColor = false
 invisibleToggleBtn.ZIndex = 3
 invisibleToggleBtn.LayoutOrder = 7
@@ -735,12 +735,12 @@ invisibleToggleStroke.Parent = invisibleToggleBtn
 
 -- WalkSpeed Label
 local walkSpeedLabel = Instance.new("TextLabel")
-walkSpeedLabel.Size = UDim2.new(1, 0, 0, 14)
+walkSpeedLabel.Size = UDim2.new(1, 0, 0, 16)
 walkSpeedLabel.BackgroundTransparency = 1
 walkSpeedLabel.Text = "🚶 Walk: 16"
 walkSpeedLabel.TextColor3 = Color3.fromRGB(200, 220, 255)
 walkSpeedLabel.Font = Enum.Font.GothamBold
-walkSpeedLabel.TextSize = 9
+walkSpeedLabel.TextSize = 10
 walkSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
 walkSpeedLabel.ZIndex = 3
 walkSpeedLabel.LayoutOrder = 8
@@ -749,14 +749,14 @@ walkSpeedLabel.Parent = miscScroll
 -- WalkSpeed Input
 local walkSpeedInput = Instance.new("TextBox")
 walkSpeedInput.Name = "WalkSpeedInput"
-walkSpeedInput.Size = UDim2.new(1, 0, 0, 20)
+walkSpeedInput.Size = UDim2.new(1, 0, 0, 24)
 walkSpeedInput.BackgroundColor3 = Color3.fromRGB(30, 30, 60)
 walkSpeedInput.PlaceholderText = "1-200"
 walkSpeedInput.Text = "16"
 walkSpeedInput.TextColor3 = Color3.fromRGB(230, 220, 255)
 walkSpeedInput.PlaceholderColor3 = Color3.fromRGB(140, 120, 180)
 walkSpeedInput.Font = Enum.Font.Gotham
-walkSpeedInput.TextSize = 9
+walkSpeedInput.TextSize = 11
 walkSpeedInput.ZIndex = 3
 walkSpeedInput.LayoutOrder = 9
 walkSpeedInput.Parent = miscScroll
@@ -773,12 +773,12 @@ walkSpeedInputStroke.Parent = walkSpeedInput
 -- Apply WalkSpeed Button
 local applyWalkSpeedBtn = Instance.new("TextButton")
 applyWalkSpeedBtn.Name = "ApplyWalkSpeed"
-applyWalkSpeedBtn.Size = UDim2.new(1, 0, 0, 24)
+applyWalkSpeedBtn.Size = UDim2.new(1, 0, 0, 32)
 applyWalkSpeedBtn.BackgroundColor3 = Color3.fromRGB(70, 30, 120)
 applyWalkSpeedBtn.Text = "✓ Apply"
 applyWalkSpeedBtn.TextColor3 = Color3.fromRGB(240, 230, 255)
 applyWalkSpeedBtn.Font = Enum.Font.GothamBold
-applyWalkSpeedBtn.TextSize = 9
+applyWalkSpeedBtn.TextSize = 12
 applyWalkSpeedBtn.AutoButtonColor = false
 applyWalkSpeedBtn.ZIndex = 3
 applyWalkSpeedBtn.LayoutOrder = 10
@@ -789,7 +789,7 @@ applyWalkSpeedCorner.CornerRadius = UDim.new(0, 6)
 applyWalkSpeedCorner.Parent = applyWalkSpeedBtn
 
 -- ============ POSITION LIST LOGIC ============
-local entryButtons = {} -- index -> button instance
+local entryButtons = {}
 
 local function refreshHighlights()
     for i, btn in pairs(entryButtons) do
@@ -836,14 +836,13 @@ local function addEntryToList(entryIndex, entryName)
     entryButtons[entryIndex] = entryButton
 end
 
--- ============ ADVANCED TELEPORT METHODS ============
+-- ============ TELEPORT METHODS ============
 
 local function instantTeleport(targetCFrame)
     local character = player.Character
     if not character then return end
     local hrp = character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-    
     hrp.CFrame = targetCFrame
 end
 
@@ -865,35 +864,32 @@ local function realisticTeleport(targetCFrame)
     if not hrp then return end
     
     local startPos = hrp.CFrame
-    local targetPos = targetCFrame
-    local distance = (targetPos.Position - startPos.Position).Magnitude
-    
+    local distance = (targetCFrame.Position - startPos.Position).Magnitude
     local steps = math.ceil(distance / 50)
+    
     for i = 1, steps do
         if not character or not character.Parent then break end
         local alpha = i / steps
-        local newCFrame = startPos:Lerp(targetPos, alpha)
-        hrp.CFrame = newCFrame
+        hrp.CFrame = startPos:Lerp(targetCFrame, alpha)
         RunService.RenderStepped:Wait()
     end
     
     if character and character.Parent then
-        hrp.CFrame = targetPos
+        hrp.CFrame = targetCFrame
     end
 end
 
--- ============ ADVANCED NOCLIP FUNCTION ============
+-- ============ NOCLIP ============
+
 local function startNoclip()
     if isNoclipping then return end
     isNoclipping = true
 
     local character = player.Character
     if not character then isNoclipping = false return end
-    
     local hrp = character:FindFirstChild("HumanoidRootPart")
     if not hrp then isNoclipping = false return end
 
-    -- Disable collision for all character parts
     for _, part in pairs(character:GetDescendants()) do
         if part:IsA("BasePart") then
             originalCollisionGroups[part] = part.CanCollide
@@ -904,43 +900,33 @@ local function startNoclip()
     noclipToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 120, 30)
     noclipToggleBtn.Text = "👻 Stop"
     
-    -- START NOCLIP MOVEMENT LOOP
     if noclipConnection then noclipConnection:Disconnect() end
     noclipConnection = RunService.RenderStepped:Connect(function()
         if not isNoclipping then return end
-        local character = player.Character
-        if not character then return end
-        local hrp = character:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
+        local char = player.Character
+        if not char then return end
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if not root then return end
+        
+        local cam = workspace.CurrentCamera
+        local forward = (cam.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit
+        local right = cam.CFrame.RightVector
+        local up = Vector3.new(0, 1, 0)
         
         local moveDir = Vector3.new(0, 0, 0)
-        local camera = workspace.CurrentCamera
         
-        -- Get movement input
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-            moveDir = moveDir + (camera.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-            moveDir = moveDir - (camera.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-            moveDir = moveDir - camera.CFrame.RightVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-            moveDir = moveDir + camera.CFrame.RightVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-            moveDir = moveDir + Vector3.new(0, 1, 0)
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-            moveDir = moveDir - Vector3.new(0, 1, 0)
-        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + forward end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - forward end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - right end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + right end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + up end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir = moveDir - up end
         
         if moveDir.Magnitude > 0 then
-            moveDir = moveDir.Unit
+            moveDir = moveDir.Unit * noclipSpeed * 0.016
         end
         
-        hrp.CFrame = hrp.CFrame + (moveDir * noclipSpeed * 0.016)
+        root.CFrame = root.CFrame + moveDir
     end)
 end
 
@@ -953,15 +939,11 @@ local function stopNoclip()
         noclipConnection = nil
     end
 
-    local character = player.Character
-    if character then
-        for _, part in pairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                if originalCollisionGroups[part] ~= nil then
-                    part.CanCollide = originalCollisionGroups[part]
-                else
-                    part.CanCollide = true
-                end
+    local char = player.Character
+    if char then
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") and originalCollisionGroups[part] ~= nil then
+                part.CanCollide = originalCollisionGroups[part]
             end
         end
     end
@@ -971,30 +953,23 @@ local function stopNoclip()
     noclipToggleBtn.Text = "👻 Noclip"
 end
 
--- ============ INVISIBLE FUNCTION (ANTI-CHEAT) ============
+-- ============ INVISIBLE ============
+
 local function startInvisible()
     if isInvisible then return end
     isInvisible = true
     
-    local character = player.Character
-    if not character then isInvisible = false return end
+    local char = player.Character
+    if not char then isInvisible = false return end
     
-    -- Store original transparency and visibility
-    for _, part in pairs(character:GetDescendants()) do
+    for _, part in pairs(char:GetDescendants()) do
         if part:IsA("BasePart") then
-            originalCharacterParts[part] = {
-                transparency = part.Transparency,
-                canCollide = part.CanCollide
-            }
-            -- Make invisible but keep collision for anti-cheat
+            originalCharacterParts[part] = part.Transparency
             part.Transparency = 1
         elseif part:IsA("Accessory") then
             local handle = part:FindFirstChild("Handle")
             if handle then
-                originalCharacterParts[handle] = {
-                    transparency = handle.Transparency,
-                    canCollide = handle.CanCollide
-                }
+                originalCharacterParts[handle] = handle.Transparency
                 handle.Transparency = 1
             end
         end
@@ -1008,12 +983,11 @@ local function stopInvisible()
     if not isInvisible then return end
     isInvisible = false
     
-    local character = player.Character
-    if character then
-        for part, data in pairs(originalCharacterParts) do
+    local char = player.Character
+    if char then
+        for part, trans in pairs(originalCharacterParts) do
             if part and part.Parent then
-                part.Transparency = data.transparency
-                part.CanCollide = data.canCollide
+                part.Transparency = trans
             end
         end
     end
@@ -1023,14 +997,15 @@ local function stopInvisible()
     invisibleToggleBtn.Text = "👁️ Invisible"
 end
 
--- ============ FLY FUNCTION ============
+-- ============ FLY ============
+
 local function startFlying()
     if isFlying then return end
     isFlying = true
 
-    local character = player.Character
-    if not character then isFlying = false return end
-    local hrp = character:FindFirstChild("HumanoidRootPart")
+    local char = player.Character
+    if not char then isFlying = false return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then isFlying = false return end
 
     flyBody = Instance.new("Part")
@@ -1051,42 +1026,31 @@ local function startFlying()
     flyToggleBtn.BackgroundColor3 = Color3.fromRGB(150, 30, 30)
     flyToggleBtn.Text = "✈️ Stop"
     
-    -- START FLY MOVEMENT LOOP
     if flyConnection then flyConnection:Disconnect() end
     flyConnection = RunService.RenderStepped:Connect(function()
         if not isFlying or not flyBody or not flyBodyVelocity then return end
         
-        local character = player.Character
-        if not character or not character.Parent then return end
-        local hrp = character:FindFirstChild("HumanoidRootPart")
+        local char = player.Character
+        if not char or not char.Parent then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
         if not hrp then return end
         
-        -- Update fly speed from text box
         flySpeed = tonumber(flySpeedSlider.Text) or 50
         flySpeedLabel.Text = "✈️ Speed: " .. flySpeed
         
-        local moveDir = Vector3.new(0, 0, 0)
-        local camera = workspace.CurrentCamera
+        local cam = workspace.CurrentCamera
+        local forward = (cam.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit
+        local right = cam.CFrame.RightVector
+        local up = Vector3.new(0, 1, 0)
         
-        -- Get movement input
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-            moveDir = moveDir + (camera.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-            moveDir = moveDir - (camera.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-            moveDir = moveDir - camera.CFrame.RightVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-            moveDir = moveDir + camera.CFrame.RightVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-            moveDir = moveDir + Vector3.new(0, 1, 0)
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-            moveDir = moveDir - Vector3.new(0, 1, 0)
-        end
+        local moveDir = Vector3.new(0, 0, 0)
+        
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + forward end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - forward end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - right end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + right end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + up end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir = moveDir - up end
         
         if moveDir.Magnitude > 0 then
             moveDir = moveDir.Unit * flySpeed
@@ -1145,7 +1109,6 @@ end)
 
 -- ============ BUTTON EVENTS ============
 
--- Tab switching
 teleporterTabBtn.MouseButton1Click:Connect(function()
     currentTab = "teleporter"
     teleporterTab.Visible = true
@@ -1166,7 +1129,6 @@ miscTabBtn.MouseButton1Click:Connect(function()
     miscTabStroke.Transparency = 0.3
 end)
 
--- Teleport method switching
 instantMethodBtn.MouseButton1Click:Connect(function()
     teleportMethod = "instant"
     methodLabel.Text = "Method: instant"
@@ -1191,11 +1153,10 @@ realisticMethodBtn.MouseButton1Click:Connect(function()
     realisticMethodBtn.BackgroundColor3 = Color3.fromRGB(100, 60, 180)
 end)
 
--- Save position
 saveButton.MouseButton1Click:Connect(function()
-    local character = player.Character
-    if not character then return end
-    local hrp = character:FindFirstChild("HumanoidRootPart")
+    local char = player.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
     local posName = nameBox.Text
@@ -1208,7 +1169,6 @@ saveButton.MouseButton1Click:Connect(function()
     nameBox.Text = ""
 end)
 
--- Teleport button
 teleportButton.MouseButton1Click:Connect(function()
     if not selectedIndex or not savedPositions[selectedIndex] then return end
     
@@ -1223,10 +1183,8 @@ teleportButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Delete button
 deleteButton.MouseButton1Click:Connect(function()
     if not selectedIndex then return end
-    
     table.remove(savedPositions, selectedIndex)
     entryButtons[selectedIndex]:Destroy()
     entryButtons[selectedIndex] = nil
@@ -1234,7 +1192,6 @@ deleteButton.MouseButton1Click:Connect(function()
     refreshHighlights()
 end)
 
--- Clear All button
 clearButton.MouseButton1Click:Connect(function()
     for i, btn in pairs(entryButtons) do
         btn:Destroy()
@@ -1244,7 +1201,6 @@ clearButton.MouseButton1Click:Connect(function()
     selectedIndex = nil
 end)
 
--- Minimize button
 minimizeButton.MouseButton1Click:Connect(function()
     if contentFrame.Visible then
         contentFrame.Visible = false
@@ -1255,34 +1211,18 @@ minimizeButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Fly Toggle
 flyToggleBtn.MouseButton1Click:Connect(function()
-    if isFlying then
-        stopFlying()
-    else
-        startFlying()
-    end
+    if isFlying then stopFlying() else startFlying() end
 end)
 
--- Noclip Toggle
 noclipToggleBtn.MouseButton1Click:Connect(function()
-    if isNoclipping then
-        stopNoclip()
-    else
-        startNoclip()
-    end
+    if isNoclipping then stopNoclip() else startNoclip() end
 end)
 
--- Invisible Toggle
 invisibleToggleBtn.MouseButton1Click:Connect(function()
-    if isInvisible then
-        stopInvisible()
-    else
-        startInvisible()
-    end
+    if isInvisible then stopInvisible() else startInvisible() end
 end)
 
--- Noclip Speed Update
 noclipSpeedSlider.FocusLost:Connect(function()
     local newSpeed = tonumber(noclipSpeedSlider.Text)
     if newSpeed then
@@ -1292,7 +1232,6 @@ noclipSpeedSlider.FocusLost:Connect(function()
     end
 end)
 
--- Fly Speed Update
 flySpeedSlider.FocusLost:Connect(function()
     local newSpeed = tonumber(flySpeedSlider.Text)
     if newSpeed then
@@ -1302,11 +1241,10 @@ flySpeedSlider.FocusLost:Connect(function()
     end
 end)
 
--- WalkSpeed Apply
 applyWalkSpeedBtn.MouseButton1Click:Connect(function()
-    local character = player.Character
-    if not character then return end
-    local humanoid = character:FindFirstChild("Humanoid")
+    local char = player.Character
+    if not char then return end
+    local humanoid = char:FindFirstChild("Humanoid")
     if not humanoid then return end
     
     local newSpeed = tonumber(walkSpeedInput.Text)
