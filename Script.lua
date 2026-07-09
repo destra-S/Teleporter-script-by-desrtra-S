@@ -5,6 +5,7 @@
       - Save positions and teleport (3 methods: instant, smooth, realistic)
       - Fly with adjustable speed
       - Advanced anti-cheat noclip
+      - Invisible mode (anti-cheat)
       - Change WalkSpeed
       - Drag the window around, minimize it
 
@@ -42,6 +43,10 @@ local noclipConnections = {}
 local originalCollisionGroups = {}
 local noclipConnection = nil
 
+-- Invisible state
+local isInvisible = false
+local originalCharacterParts = {}
+
 -- ============ GUI SETUP ============
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "GalaxyTeleporterGui"
@@ -50,8 +55,8 @@ screenGui.Parent = playerGui
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 380, 0, 420)
-mainFrame.Position = UDim2.new(0.5, -190, 0.5, -210)
+mainFrame.Size = UDim2.new(0, 380, 0, 500)
+mainFrame.Position = UDim2.new(0.5, -190, 0.5, -250)
 mainFrame.BackgroundColor3 = Color3.fromRGB(10, 8, 30)
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
@@ -633,6 +638,29 @@ noclipToggleStroke.Color = Color3.fromRGB(200, 160, 80)
 noclipToggleStroke.Transparency = 0.3
 noclipToggleStroke.Parent = noclipToggleBtn
 
+-- Invisible Toggle Button
+local invisibleToggleBtn = Instance.new("TextButton")
+invisibleToggleBtn.Name = "InvisibleToggle"
+invisibleToggleBtn.Size = UDim2.new(1, 0, 0, 28)
+invisibleToggleBtn.BackgroundColor3 = Color3.fromRGB(100, 50, 150)
+invisibleToggleBtn.Text = "👁️ Invisible"
+invisibleToggleBtn.TextColor3 = Color3.fromRGB(230, 200, 255)
+invisibleToggleBtn.Font = Enum.Font.GothamBold
+invisibleToggleBtn.TextSize = 11
+invisibleToggleBtn.AutoButtonColor = false
+invisibleToggleBtn.ZIndex = 3
+invisibleToggleBtn.LayoutOrder = 3
+invisibleToggleBtn.Parent = miscScroll
+
+local invisibleToggleCorner = Instance.new("UICorner")
+invisibleToggleCorner.CornerRadius = UDim.new(0, 8)
+invisibleToggleCorner.Parent = invisibleToggleBtn
+
+local invisibleToggleStroke = Instance.new("UIStroke")
+invisibleToggleStroke.Color = Color3.fromRGB(180, 120, 220)
+invisibleToggleStroke.Transparency = 0.3
+invisibleToggleStroke.Parent = invisibleToggleBtn
+
 -- Fly Speed Label
 local flySpeedLabel = Instance.new("TextLabel")
 flySpeedLabel.Size = UDim2.new(1, 0, 0, 14)
@@ -643,7 +671,7 @@ flySpeedLabel.Font = Enum.Font.GothamBold
 flySpeedLabel.TextSize = 9
 flySpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
 flySpeedLabel.ZIndex = 3
-flySpeedLabel.LayoutOrder = 3
+flySpeedLabel.LayoutOrder = 4
 flySpeedLabel.Parent = miscScroll
 
 -- Fly Speed Slider
@@ -658,7 +686,7 @@ flySpeedSlider.PlaceholderColor3 = Color3.fromRGB(140, 120, 180)
 flySpeedSlider.Font = Enum.Font.Gotham
 flySpeedSlider.TextSize = 9
 flySpeedSlider.ZIndex = 3
-flySpeedSlider.LayoutOrder = 4
+flySpeedSlider.LayoutOrder = 5
 flySpeedSlider.Parent = miscScroll
 
 local flySpeedSliderCorner = Instance.new("UICorner")
@@ -680,7 +708,7 @@ noclipSpeedLabel.Font = Enum.Font.GothamBold
 noclipSpeedLabel.TextSize = 9
 noclipSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
 noclipSpeedLabel.ZIndex = 3
-noclipSpeedLabel.LayoutOrder = 5
+noclipSpeedLabel.LayoutOrder = 6
 noclipSpeedLabel.Parent = miscScroll
 
 -- Noclip Speed Slider
@@ -695,7 +723,7 @@ noclipSpeedSlider.PlaceholderColor3 = Color3.fromRGB(140, 120, 180)
 noclipSpeedSlider.Font = Enum.Font.Gotham
 noclipSpeedSlider.TextSize = 9
 noclipSpeedSlider.ZIndex = 3
-noclipSpeedSlider.LayoutOrder = 6
+noclipSpeedSlider.LayoutOrder = 7
 noclipSpeedSlider.Parent = miscScroll
 
 local noclipSpeedSliderCorner = Instance.new("UICorner")
@@ -717,7 +745,7 @@ walkSpeedLabel.Font = Enum.Font.GothamBold
 walkSpeedLabel.TextSize = 9
 walkSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
 walkSpeedLabel.ZIndex = 3
-walkSpeedLabel.LayoutOrder = 7
+walkSpeedLabel.LayoutOrder = 8
 walkSpeedLabel.Parent = miscScroll
 
 -- WalkSpeed Input
@@ -732,7 +760,7 @@ walkSpeedInput.PlaceholderColor3 = Color3.fromRGB(140, 120, 180)
 walkSpeedInput.Font = Enum.Font.Gotham
 walkSpeedInput.TextSize = 9
 walkSpeedInput.ZIndex = 3
-walkSpeedInput.LayoutOrder = 8
+walkSpeedInput.LayoutOrder = 9
 walkSpeedInput.Parent = miscScroll
 
 local walkSpeedInputCorner = Instance.new("UICorner")
@@ -755,7 +783,7 @@ applyWalkSpeedBtn.Font = Enum.Font.GothamBold
 applyWalkSpeedBtn.TextSize = 9
 applyWalkSpeedBtn.AutoButtonColor = false
 applyWalkSpeedBtn.ZIndex = 3
-applyWalkSpeedBtn.LayoutOrder = 9
+applyWalkSpeedBtn.LayoutOrder = 10
 applyWalkSpeedBtn.Parent = miscScroll
 
 local applyWalkSpeedCorner = Instance.new("UICorner")
@@ -940,6 +968,66 @@ local function stopNoclip()
     originalCollisionGroups = {}
     noclipToggleBtn.BackgroundColor3 = Color3.fromRGB(120, 80, 30)
     noclipToggleBtn.Text = "👻 Noclip"
+end
+
+-- ============ INVISIBLE FUNCTION (ANTI-CHEAT) ============
+local function startInvisible()
+    if isInvisible then return end
+    isInvisible = true
+    
+    local character = player.Character
+    if not character then isInvisible = false return end
+    
+    -- Store original transparency and visibility
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            originalCharacterParts[part] = {
+                transparency = part.Transparency,
+                canCollide = part.CanCollide
+            }
+            -- Make invisible but keep collision for anti-cheat
+            part.Transparency = 1
+        elseif part:IsA("Accessory") then
+            local handle = part:FindFirstChild("Handle")
+            if handle then
+                originalCharacterParts[handle] = {
+                    transparency = handle.Transparency,
+                    canCollide = handle.CanCollide
+                }
+                handle.Transparency = 1
+            end
+        end
+    end
+    
+    -- Hide character name
+    if character:FindFirstChild("Head") then
+        local head = character:FindFirstChild("Head")
+        if head:FindFirstChild("NameGui") then
+            head:FindFirstChild("NameGui"):Destroy()
+        end
+    end
+    
+    invisibleToggleBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 200)
+    invisibleToggleBtn.Text = "👁️ Visible"
+end
+
+local function stopInvisible()
+    if not isInvisible then return end
+    isInvisible = false
+    
+    local character = player.Character
+    if character then
+        for part, data in pairs(originalCharacterParts) do
+            if part and part.Parent then
+                part.Transparency = data.transparency
+                part.CanCollide = data.canCollide
+            end
+        end
+    end
+    
+    originalCharacterParts = {}
+    invisibleToggleBtn.BackgroundColor3 = Color3.fromRGB(100, 50, 150)
+    invisibleToggleBtn.Text = "👁️ Invisible"
 end
 
 -- ============ FLY FUNCTION ============
@@ -1184,6 +1272,15 @@ noclipToggleBtn.MouseButton1Click:Connect(function()
         stopNoclip()
     else
         startNoclip()
+    end
+end)
+
+-- Invisible Toggle
+invisibleToggleBtn.MouseButton1Click:Connect(function()
+    if isInvisible then
+        stopInvisible()
+    else
+        startInvisible()
     end
 end)
 
