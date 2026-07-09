@@ -31,7 +31,6 @@ local teleportMethod = "instant" -- "instant", "tween", or "realistic"
 -- Fly state
 local isFlying = false
 local flySpeed = 50
-local flyDirection = Vector3.new(0, 0, 0)
 local flyBody = nil
 local flyBodyVelocity = nil
 local flyConnection = nil
@@ -39,7 +38,6 @@ local flyConnection = nil
 -- Noclip state
 local isNoclipping = false
 local noclipSpeed = 25
-local noclipConnections = {}
 local originalCollisionGroups = {}
 local noclipConnection = nil
 
@@ -55,8 +53,8 @@ screenGui.Parent = playerGui
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 380, 0, 500)
-mainFrame.Position = UDim2.new(0.5, -190, 0.5, -250)
+mainFrame.Size = UDim2.new(0, 380, 0, 520)
+mainFrame.Position = UDim2.new(0.5, -190, 0.5, -260)
 mainFrame.BackgroundColor3 = Color3.fromRGB(10, 8, 30)
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
@@ -615,52 +613,6 @@ flyToggleStroke.Color = Color3.fromRGB(100, 200, 100)
 flyToggleStroke.Transparency = 0.3
 flyToggleStroke.Parent = flyToggleBtn
 
--- Noclip Toggle Button
-local noclipToggleBtn = Instance.new("TextButton")
-noclipToggleBtn.Name = "NoclipToggle"
-noclipToggleBtn.Size = UDim2.new(1, 0, 0, 28)
-noclipToggleBtn.BackgroundColor3 = Color3.fromRGB(120, 80, 30)
-noclipToggleBtn.Text = "👻 Noclip"
-noclipToggleBtn.TextColor3 = Color3.fromRGB(255, 240, 200)
-noclipToggleBtn.Font = Enum.Font.GothamBold
-noclipToggleBtn.TextSize = 11
-noclipToggleBtn.AutoButtonColor = false
-noclipToggleBtn.ZIndex = 3
-noclipToggleBtn.LayoutOrder = 2
-noclipToggleBtn.Parent = miscScroll
-
-local noclipToggleCorner = Instance.new("UICorner")
-noclipToggleCorner.CornerRadius = UDim.new(0, 8)
-noclipToggleCorner.Parent = noclipToggleBtn
-
-local noclipToggleStroke = Instance.new("UIStroke")
-noclipToggleStroke.Color = Color3.fromRGB(200, 160, 80)
-noclipToggleStroke.Transparency = 0.3
-noclipToggleStroke.Parent = noclipToggleBtn
-
--- Invisible Toggle Button
-local invisibleToggleBtn = Instance.new("TextButton")
-invisibleToggleBtn.Name = "InvisibleToggle"
-invisibleToggleBtn.Size = UDim2.new(1, 0, 0, 28)
-invisibleToggleBtn.BackgroundColor3 = Color3.fromRGB(100, 50, 150)
-invisibleToggleBtn.Text = "👁️ Invisible"
-invisibleToggleBtn.TextColor3 = Color3.fromRGB(230, 200, 255)
-invisibleToggleBtn.Font = Enum.Font.GothamBold
-invisibleToggleBtn.TextSize = 11
-invisibleToggleBtn.AutoButtonColor = false
-invisibleToggleBtn.ZIndex = 3
-invisibleToggleBtn.LayoutOrder = 3
-invisibleToggleBtn.Parent = miscScroll
-
-local invisibleToggleCorner = Instance.new("UICorner")
-invisibleToggleCorner.CornerRadius = UDim.new(0, 8)
-invisibleToggleCorner.Parent = invisibleToggleBtn
-
-local invisibleToggleStroke = Instance.new("UIStroke")
-invisibleToggleStroke.Color = Color3.fromRGB(180, 120, 220)
-invisibleToggleStroke.Transparency = 0.3
-invisibleToggleStroke.Parent = invisibleToggleBtn
-
 -- Fly Speed Label
 local flySpeedLabel = Instance.new("TextLabel")
 flySpeedLabel.Size = UDim2.new(1, 0, 0, 14)
@@ -671,7 +623,7 @@ flySpeedLabel.Font = Enum.Font.GothamBold
 flySpeedLabel.TextSize = 9
 flySpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
 flySpeedLabel.ZIndex = 3
-flySpeedLabel.LayoutOrder = 4
+flySpeedLabel.LayoutOrder = 2
 flySpeedLabel.Parent = miscScroll
 
 -- Fly Speed Slider
@@ -686,7 +638,7 @@ flySpeedSlider.PlaceholderColor3 = Color3.fromRGB(140, 120, 180)
 flySpeedSlider.Font = Enum.Font.Gotham
 flySpeedSlider.TextSize = 9
 flySpeedSlider.ZIndex = 3
-flySpeedSlider.LayoutOrder = 5
+flySpeedSlider.LayoutOrder = 3
 flySpeedSlider.Parent = miscScroll
 
 local flySpeedSliderCorner = Instance.new("UICorner")
@@ -698,6 +650,29 @@ flySpeedSliderStroke.Color = Color3.fromRGB(120, 90, 200)
 flySpeedSliderStroke.Transparency = 0.4
 flySpeedSliderStroke.Parent = flySpeedSlider
 
+-- Noclip Toggle Button
+local noclipToggleBtn = Instance.new("TextButton")
+noclipToggleBtn.Name = "NoclipToggle"
+noclipToggleBtn.Size = UDim2.new(1, 0, 0, 28)
+noclipToggleBtn.BackgroundColor3 = Color3.fromRGB(120, 80, 30)
+noclipToggleBtn.Text = "👻 Noclip"
+noclipToggleBtn.TextColor3 = Color3.fromRGB(255, 240, 200)
+noclipToggleBtn.Font = Enum.Font.GothamBold
+noclipToggleBtn.TextSize = 11
+noclipToggleBtn.AutoButtonColor = false
+noclipToggleBtn.ZIndex = 3
+noclipToggleBtn.LayoutOrder = 4
+noclipToggleBtn.Parent = miscScroll
+
+local noclipToggleCorner = Instance.new("UICorner")
+noclipToggleCorner.CornerRadius = UDim.new(0, 8)
+noclipToggleCorner.Parent = noclipToggleBtn
+
+local noclipToggleStroke = Instance.new("UIStroke")
+noclipToggleStroke.Color = Color3.fromRGB(200, 160, 80)
+noclipToggleStroke.Transparency = 0.3
+noclipToggleStroke.Parent = noclipToggleBtn
+
 -- Noclip Speed Label
 local noclipSpeedLabel = Instance.new("TextLabel")
 noclipSpeedLabel.Size = UDim2.new(1, 0, 0, 14)
@@ -708,7 +683,7 @@ noclipSpeedLabel.Font = Enum.Font.GothamBold
 noclipSpeedLabel.TextSize = 9
 noclipSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
 noclipSpeedLabel.ZIndex = 3
-noclipSpeedLabel.LayoutOrder = 6
+noclipSpeedLabel.LayoutOrder = 5
 noclipSpeedLabel.Parent = miscScroll
 
 -- Noclip Speed Slider
@@ -723,7 +698,7 @@ noclipSpeedSlider.PlaceholderColor3 = Color3.fromRGB(140, 120, 180)
 noclipSpeedSlider.Font = Enum.Font.Gotham
 noclipSpeedSlider.TextSize = 9
 noclipSpeedSlider.ZIndex = 3
-noclipSpeedSlider.LayoutOrder = 7
+noclipSpeedSlider.LayoutOrder = 6
 noclipSpeedSlider.Parent = miscScroll
 
 local noclipSpeedSliderCorner = Instance.new("UICorner")
@@ -734,6 +709,29 @@ local noclipSpeedSliderStroke = Instance.new("UIStroke")
 noclipSpeedSliderStroke.Color = Color3.fromRGB(120, 90, 200)
 noclipSpeedSliderStroke.Transparency = 0.4
 noclipSpeedSliderStroke.Parent = noclipSpeedSlider
+
+-- Invisible Toggle Button
+local invisibleToggleBtn = Instance.new("TextButton")
+invisibleToggleBtn.Name = "InvisibleToggle"
+invisibleToggleBtn.Size = UDim2.new(1, 0, 0, 28)
+invisibleToggleBtn.BackgroundColor3 = Color3.fromRGB(100, 50, 150)
+invisibleToggleBtn.Text = "👁️ Invisible"
+invisibleToggleBtn.TextColor3 = Color3.fromRGB(230, 200, 255)
+invisibleToggleBtn.Font = Enum.Font.GothamBold
+invisibleToggleBtn.TextSize = 11
+invisibleToggleBtn.AutoButtonColor = false
+invisibleToggleBtn.ZIndex = 3
+invisibleToggleBtn.LayoutOrder = 7
+invisibleToggleBtn.Parent = miscScroll
+
+local invisibleToggleCorner = Instance.new("UICorner")
+invisibleToggleCorner.CornerRadius = UDim.new(0, 8)
+invisibleToggleCorner.Parent = invisibleToggleBtn
+
+local invisibleToggleStroke = Instance.new("UIStroke")
+invisibleToggleStroke.Color = Color3.fromRGB(180, 120, 220)
+invisibleToggleStroke.Transparency = 0.3
+invisibleToggleStroke.Parent = invisibleToggleBtn
 
 -- WalkSpeed Label
 local walkSpeedLabel = Instance.new("TextLabel")
@@ -855,7 +853,7 @@ local function smoothTeleport(targetCFrame)
     local hrp = character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
     
-    local tween = TweenService:Create(hrp, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {CFrame = targetCFrame})
+    local tween = TweenService:Create(hrp, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {CFrame = targetCFrame})
     tween:Play()
     tween.Completed:Wait()
 end
@@ -872,13 +870,16 @@ local function realisticTeleport(targetCFrame)
     
     local steps = math.ceil(distance / 50)
     for i = 1, steps do
+        if not character or not character.Parent then break end
         local alpha = i / steps
         local newCFrame = startPos:Lerp(targetPos, alpha)
         hrp.CFrame = newCFrame
         RunService.RenderStepped:Wait()
     end
     
-    hrp.CFrame = targetPos
+    if character and character.Parent then
+        hrp.CFrame = targetPos
+    end
 end
 
 -- ============ ADVANCED NOCLIP FUNCTION ============
@@ -999,14 +1000,6 @@ local function startInvisible()
         end
     end
     
-    -- Hide character name
-    if character:FindFirstChild("Head") then
-        local head = character:FindFirstChild("Head")
-        if head:FindFirstChild("NameGui") then
-            head:FindFirstChild("NameGui"):Destroy()
-        end
-    end
-    
     invisibleToggleBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 200)
     invisibleToggleBtn.Text = "👁️ Visible"
 end
@@ -1061,7 +1054,12 @@ local function startFlying()
     -- START FLY MOVEMENT LOOP
     if flyConnection then flyConnection:Disconnect() end
     flyConnection = RunService.RenderStepped:Connect(function()
-        if not isFlying or not flyBodyVelocity then return end
+        if not isFlying or not flyBody or not flyBodyVelocity then return end
+        
+        local character = player.Character
+        if not character or not character.Parent then return end
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
         
         -- Update fly speed from text box
         flySpeed = tonumber(flySpeedSlider.Text) or 50
@@ -1294,7 +1292,7 @@ noclipSpeedSlider.FocusLost:Connect(function()
     end
 end)
 
--- Fly Speed Update (also happens in render loop but this is for text box changes)
+-- Fly Speed Update
 flySpeedSlider.FocusLost:Connect(function()
     local newSpeed = tonumber(flySpeedSlider.Text)
     if newSpeed then
